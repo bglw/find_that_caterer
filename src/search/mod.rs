@@ -141,12 +141,13 @@ pub fn search(titles: Vec<String>) {
     let end_q = Instant::now().duration_since(start_q);
     println!("Scored shows in {}s", end_q.as_secs());
 
-    println!("----> Top 20 shows:");
+    println!("----> Top 100 shows:");
 
-    for affinity in show_affinities.into_iter().take(20) {
+    for affinity in show_affinities.into_iter().take(100) {
         println!(
-            "\n\n### {}\nRating: {}\n{}: {}",
+            "\n\n### {} ({})\nRating: {}\n{}: {}",
             style(affinity.show.title).bold(),
+            affinity.show.start_year,
             affinity
                 .show
                 .rating

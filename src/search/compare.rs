@@ -69,12 +69,12 @@ pub fn score_show_affinity(root_shows: &[ShowRecord], candidate_show: ShowRecord
                 )
                 .cyan();
 
-                let title = &root_show.title;
+                let title = style(&root_show.title).bold().underlined();
 
                 let root_peep_eps = root_peep.episode_count;
                 let root_eps = root_show.episodes.len();
                 let root_cred = if root_peep_eps > 0 {
-                    format!("{name}: {root_peep_eps}/{root_eps} {title} ({root_jobs})")
+                    format!("{name}: {title} {root_peep_eps}/{root_eps} ({root_jobs})")
                 } else {
                     format!("{name}: {title} ({root_jobs})")
                 };
@@ -164,9 +164,9 @@ pub fn normalize_job(role: &str) -> &str {
 pub fn job_buff(role: &str) -> f32 {
     (match normalize_job(role) {
         "cinematographer" | "director of photography" => 60,
-        "composer" => 60,
         "director" => 50,
         "writer" | "written by" | "original idea" | "creator" => 40,
+        "composer" => 40,
         "production_designer" => 30,
         "editor" => 20,
         "based on" => 20,
