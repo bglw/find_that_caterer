@@ -152,7 +152,11 @@ pub fn search(titles: Vec<String>) {
             "\n\n### {} ({}) {}\nRating: {}\n{}: {}",
             style(affinity.show.title).bold(),
             affinity.show.start_year,
-            style(affinity.show.id).dim(),
+            style(format!(
+                "https://www.imdb.com/title/tt{:07}",
+                affinity.show.id
+            ))
+            .dim(),
             affinity
                 .show
                 .rating
@@ -160,8 +164,8 @@ pub fn search(titles: Vec<String>) {
             affinity.show.title_type,
             affinity.show.genres,
         );
-        for (d, bar) in affinity.descriptions {
-            println!("{} {}", bar, d);
+        for credit in affinity.credits {
+            println!("{} {}", credit.bar, credit.text);
         }
     }
 }

@@ -5,7 +5,13 @@ use super::show_tree::ShowRecord;
 pub struct ShowAffinity {
     pub show: ShowRecord,
     pub score: f32,
-    pub descriptions: Vec<(String, String)>,
+    pub credits: Vec<AffinityCredit>,
+}
+
+pub struct AffinityCredit {
+    pub text: String,
+    pub bar: String,
+    pub name: String,
 }
 
 fn calc_overlap_bar(
@@ -44,11 +50,25 @@ fn calc_overlap_bar(
 
 pub fn score_show_affinity(root_shows: &[ShowRecord], candidate_show: ShowRecord) -> ShowAffinity {
     let mut score = 0.0;
-    let mut descriptions = vec![];
+    let mut credits: Vec<AffinityCredit> = vec![];
+    let mut root_show_count = 0;
     for root_show in root_shows {
+        let mut has_stylistic_peep_overlap = false;
+
         for root_peep in root_show.peeps.values() {
             if let Some(candidate_peep) = candidate_show.peeps.get(&root_peep.id) {
-                score += root_peep.score * candidate_peep.score;
+                if candidate_peep.stylistic {
+                    has_stylistic_peep_overlap = true;
+                }
+
+                let existing_credit_count =
+                    credits.iter().filter(|c| c.name == root_peep.name).count();
+                if existing_credit_count > 0 {
+                    score += (root_peep.score * candidate_peep.score)
+                        / (existing_credit_count + 2) as f32;
+                } else {
+                    score += root_peep.score * candidate_peep.score;
+                }
                 let name = &root_peep.name;
                 let root_jobs = style(
                     root_peep
@@ -74,9 +94,9 @@ pub fn score_show_affinity(root_shows: &[ShowRecord], candidate_show: ShowRecord
                 let root_peep_eps = root_peep.episode_count;
                 let root_eps = root_show.episodes.len();
                 let root_cred = if root_peep_eps > 0 {
-                    format!("{name}: {title} {root_peep_eps}/{root_eps} ({root_jobs})")
+                    format!("[{title}] {name}: {root_peep_eps}/{root_eps} ({root_jobs})")
                 } else {
-                    format!("{name}: {title} ({root_jobs})")
+                    format!("[{title}] {name}: ({root_jobs})")
                 };
 
                 let candidate_peep_eps = candidate_peep.episode_count;
@@ -99,8 +119,16 @@ pub fn score_show_affinity(root_shows: &[ShowRecord], candidate_show: ShowRecord
                     candidate_peep_eps,
                 );
 
-                descriptions.push((format!("{root_cred} → {candidate_cred}"), format!("{bar}")));
+                credits.push(AffinityCredit {
+                    text: format!("{root_cred} → {candidate_cred}"),
+                    bar: format!("{bar}"),
+                    name: root_peep.name.clone(),
+                });
             }
+        }
+
+        if has_stylistic_peep_overlap {
+            root_show_count += 1;
         }
     }
 
@@ -111,11 +139,16 @@ pub fn score_show_affinity(root_shows: &[ShowRecord], candidate_show: ShowRecord
         .unwrap_or(5.0);
 
     score *= parsed_rating;
+    if root_show_count > 1 {
+        score *= root_show_count as f32;
+    }
+
+    credits.sort_by(|a, b| a.name.cmp(&b.name));
 
     ShowAffinity {
         show: candidate_show,
         score,
-        descriptions,
+        credits,
     }
 }
 
@@ -127,38 +160,38 @@ pub fn best_job(roles: &Vec<String>) -> &String {
 }
 
 pub fn normalize_job(role: &str) -> &str {
-    if role.contains("written")
-        || role.contains("script")
-        || role.contains("writer")
-        || role.contains("developed")
-        || role.contains("created")
-        || role.contains("creator")
-        || role.contains("story")
-        || role.contains("screenplay")
-        || role.contains("writing")
-        || role.contains("adapted")
-        || role.contains("devise")
-        || role.contains("book")
-        || role.contains("play")
-        || role.contains("idea")
+    let r = role.to_lowercase();
+    if r.contains("written")
+        || r.contains("script")
+        || r.contains("writer")
+        || r.contains("developed")
+        || r.contains("created")
+        || r.contains("creator")
+        || r.contains("story")
+        || r.contains("screenplay")
+        || r.contains("writing")
+        || r.contains("adapted")
+        || r.contains("devise")
+        || r.contains("book")
+        || r.contains("play")
+        || r.contains("idea")
     {
         "written by"
-    } else if role.contains("casting") {
+    } else if r.contains("casting") {
         "casting_director"
-    } else if role.contains("designer") {
+    } else if r.contains("designer") {
         "production_designer"
-    } else if role.contains("editor") {
+    } else if r.contains("editor") {
         "editor"
-    } else if role.contains("composer") {
+    } else if r.contains("composer") {
         "composer"
-    } else if role.contains("cinematographer") || role.contains("photograph") {
+    } else if r.contains("cinematographer") || r.contains("photograph") {
         "cinematographer"
-    } else if role.contains("producer") {
+    } else if r.contains("producer") {
         "producer"
-    } else if role.contains("based") || role.contains("original") || role.contains("novel") {
+    } else if r.contains("based") || r.contains("original") || r.contains("novel") {
         "based on"
-    } else if role.contains("director") || role.contains("showrunner") || role.contains("directed")
-    {
+    } else if r.contains("director") || r.contains("showrunner") || r.contains("directed") {
         "director"
     } else {
         role
