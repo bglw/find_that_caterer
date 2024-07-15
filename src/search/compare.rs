@@ -131,15 +131,15 @@ pub fn score_show_affinity(root_shows: &[ShowRecord], candidate_show: ShowRecord
         }
     }
 
-    let parsed_rating = candidate_show
+    let parsed_rating: f32 = candidate_show
         .rating
         .as_ref()
         .map(|r| r.parse().unwrap_or(5.0))
         .unwrap_or(5.0);
 
-    score *= parsed_rating;
+    score *= parsed_rating.powf(2.0);
     if root_show_count > 1 {
-        score *= root_show_count as f32;
+        score *= (root_show_count as f32) / 2.0;
     }
 
     credits.sort_by(|a, b| a.name.cmp(&b.name));
