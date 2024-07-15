@@ -9,7 +9,7 @@ use std::{
 };
 
 use crate::loading::{DataType, Episode, Peep, Principal, Rating, Show};
-use nohash_hasher::{BuildNoHashHasher, NoHashHasher};
+use nohash_hasher::{NoHashHasher};
 use rusqlite::{params, Connection, Statement};
 
 type FastMap<T> = HashMap<u64, T, BuildHasherDefault<NoHashHasher<u64>>>;

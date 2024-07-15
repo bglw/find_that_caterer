@@ -1,11 +1,11 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{HashSet},
     path::Path,
     rc::Rc,
     time::Instant,
 };
 
-use compare::{job_buff, score_show_affinity, ShowAffinity};
+use compare::{score_show_affinity, ShowAffinity};
 use console::style;
 use rusqlite::{types::Value, Connection};
 use show_tree::fetch_show_record;

@@ -35,10 +35,10 @@ fn calc_overlap_bar(
 
     format!(
         "{}{} / {}{}",
-        style(vec!["─"; (10 - l_peep_chars)].join("")).red().dim(),
+        style(vec!["─"; 10 - l_peep_chars].join("")).red().dim(),
         style(vec!["▓"; l_peep_chars].join("")).fg(l_color),
         style(vec!["▓"; r_peep_chars].join("")).fg(r_color),
-        style(vec!["─"; (10 - r_peep_chars)].join("")).red().dim(),
+        style(vec!["─"; 10 - r_peep_chars].join("")).red().dim(),
     )
 }
 
