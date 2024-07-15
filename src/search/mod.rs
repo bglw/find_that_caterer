@@ -1,9 +1,4 @@
-use std::{
-    collections::{HashSet},
-    path::Path,
-    rc::Rc,
-    time::Instant,
-};
+use std::{collections::HashSet, path::Path, rc::Rc, time::Instant};
 
 use compare::{score_show_affinity, ShowAffinity};
 use console::style;
@@ -146,18 +141,18 @@ pub fn search(titles: Vec<String>) {
     let end_q = Instant::now().duration_since(start_q);
     println!("Scored shows in {}s", end_q.as_secs());
 
-    println!("----> Top 10 shows:");
+    println!("----> Top 20 shows:");
 
-    for affinity in show_affinities.into_iter().take(10) {
+    for affinity in show_affinities.into_iter().take(20) {
         println!(
-            "\n\n### {} ({} — {}) Rating: {}",
+            "\n\n### {}\nRating: {}\n{}: {}",
             style(affinity.show.title).bold(),
-            affinity.show.title_type,
-            affinity.show.genres,
             affinity
                 .show
                 .rating
-                .unwrap_or_else(|| "unknown".to_string())
+                .unwrap_or_else(|| "unknown".to_string()),
+            affinity.show.title_type,
+            affinity.show.genres,
         );
         for (d, bar) in affinity.descriptions {
             println!("{} {}", bar, d);

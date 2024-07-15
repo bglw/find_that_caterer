@@ -104,6 +104,14 @@ pub fn score_show_affinity(root_shows: &[ShowRecord], candidate_show: ShowRecord
         }
     }
 
+    let parsed_rating = candidate_show
+        .rating
+        .as_ref()
+        .map(|r| r.parse().unwrap_or(5.0))
+        .unwrap_or(5.0);
+
+    score *= parsed_rating;
+
     ShowAffinity {
         show: candidate_show,
         score,

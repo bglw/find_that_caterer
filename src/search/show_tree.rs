@@ -179,8 +179,9 @@ pub fn fetch_show_record(db: &Connection, show_id: Value) -> ShowRecord {
         }
 
         if !show.episodes.is_empty() && show_peep.episode_count > 0 {
-            show_peep.score =
-                (show_peep.score / show.episodes.len() as f32) * show_peep.episode_count as f32
+            let proportion =
+                ((show_peep.episode_count as f32 / show.episodes.len() as f32) * 2.0).min(1.0);
+            show_peep.score *= proportion;
         }
     }
 
