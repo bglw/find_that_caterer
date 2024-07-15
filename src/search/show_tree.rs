@@ -1,5 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
+    path::Path,
     rc::Rc,
 };
 
@@ -147,7 +148,12 @@ impl ShowRecord {
     }
 }
 
-pub fn fetch_show_record(db: &Connection, show_id: Value) -> ShowRecord {
+pub fn fetch_show_record(show_id: Value) -> ShowRecord {
+    let db_path = Path::new("caterer.db");
+    let db = Connection::open(db_path).expect("can create db");
+    db.pragma_update(None, "foreign_keys", "ON").unwrap();
+    rusqlite::vtab::array::load_module(&db).expect("vtab should load");
+
     let mut show = db
         .query_row(
             "SELECT id, title, start_year, title_type, genres, rating FROM shows WHERE id=(?1);",
@@ -167,9 +173,9 @@ pub fn fetch_show_record(db: &Connection, show_id: Value) -> ShowRecord {
         )
         .expect("Show ID should exist but does not");
 
-    show.hydrate_episodes(db);
-    show.hydrate_direct_peeps(db);
-    show.hydrate_episode_peeps(db);
+    show.hydrate_episodes(&db);
+    show.hydrate_direct_peeps(&db);
+    show.hydrate_episode_peeps(&db);
 
     for show_peep in show.peeps.values_mut() {
         show_peep.score = job_buff(best_job(&show_peep.jobs));

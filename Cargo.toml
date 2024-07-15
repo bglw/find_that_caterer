@@ -9,4 +9,5 @@ edition = "2021"
 console = "0.15.8"
 lexopt = "0.3.0"
 nohash-hasher = "0.2.0"
+rayon = "1.10.0"
 rusqlite = { version = "0.31.0", features = ["bundled", "vtab", "array"] }

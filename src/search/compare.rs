@@ -132,11 +132,14 @@ pub fn normalize_job(role: &str) -> &str {
         || role.contains("writer")
         || role.contains("developed")
         || role.contains("created")
+        || role.contains("creator")
         || role.contains("story")
         || role.contains("screenplay")
         || role.contains("writing")
         || role.contains("adapted")
         || role.contains("devise")
+        || role.contains("book")
+        || role.contains("play")
         || role.contains("idea")
     {
         "written by"
@@ -154,7 +157,8 @@ pub fn normalize_job(role: &str) -> &str {
         "producer"
     } else if role.contains("based") || role.contains("original") || role.contains("novel") {
         "based on"
-    } else if role.contains("director") || role.contains("showrunner") {
+    } else if role.contains("director") || role.contains("showrunner") || role.contains("directed")
+    {
         "director"
     } else {
         role

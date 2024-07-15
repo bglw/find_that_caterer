@@ -2,6 +2,7 @@ use std::{collections::HashSet, path::Path, rc::Rc, time::Instant};
 
 use compare::{score_show_affinity, ShowAffinity};
 use console::style;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use rusqlite::{types::Value, Connection};
 use show_tree::fetch_show_record;
 
@@ -29,7 +30,7 @@ pub fn search(titles: Vec<String>) {
     let db_path = Path::new("caterer.db");
     let db = Connection::open(db_path).expect("can create db");
     db.pragma_update(None, "foreign_keys", "ON").unwrap();
-    rusqlite::vtab::array::load_module(&db).expect("vtab shount load");
+    rusqlite::vtab::array::load_module(&db).expect("vtab should load");
 
     let show_ids_ints: Vec<i64> = titles
         .into_iter()
@@ -41,7 +42,7 @@ pub fn search(titles: Vec<String>) {
 
     let shows: Vec<_> = show_ids_ints
         .iter()
-        .map(|show_id| fetch_show_record(&db, (*show_id).into()))
+        .map(|show_id| fetch_show_record((*show_id).into()))
         .collect();
 
     let end_q = Instant::now().duration_since(start_q);
@@ -97,6 +98,10 @@ pub fn search(titles: Vec<String>) {
                 show_id
             })
             .collect();
+    let all_show_ids: Vec<_> = all_show_ids
+        .into_iter()
+        .filter(|l| !show_ids_ints.contains(l))
+        .collect();
 
     let est = per_q * all_show_ids.len() as u32;
     println!(
@@ -108,9 +113,8 @@ pub fn search(titles: Vec<String>) {
     let start_q = Instant::now();
 
     let candidate_shows: Vec<_> = all_show_ids
-        .into_iter()
-        .filter(|l| !show_ids_ints.contains(l))
-        .map(|show_id| fetch_show_record(&db, show_id.into()))
+        .into_par_iter()
+        .map(|show_id| fetch_show_record(show_id.into()))
         .collect();
 
     let end_q = Instant::now().duration_since(start_q);
@@ -145,9 +149,10 @@ pub fn search(titles: Vec<String>) {
 
     for affinity in show_affinities.into_iter().take(100) {
         println!(
-            "\n\n### {} ({})\nRating: {}\n{}: {}",
+            "\n\n### {} ({}) {}\nRating: {}\n{}: {}",
             style(affinity.show.title).bold(),
             affinity.show.start_year,
+            style(affinity.show.id).dim(),
             affinity
                 .show
                 .rating
