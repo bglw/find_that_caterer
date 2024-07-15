@@ -57,10 +57,6 @@ pub fn score_show_affinity(root_shows: &[ShowRecord], candidate_show: ShowRecord
 
         for root_peep in root_show.peeps.values() {
             if let Some(candidate_peep) = candidate_show.peeps.get(&root_peep.id) {
-                if candidate_peep.stylistic {
-                    has_stylistic_peep_overlap = true;
-                }
-
                 let existing_credit_count =
                     credits.iter().filter(|c| c.name == root_peep.name).count();
                 if existing_credit_count > 0 {
@@ -68,6 +64,9 @@ pub fn score_show_affinity(root_shows: &[ShowRecord], candidate_show: ShowRecord
                         / (existing_credit_count + 2) as f32;
                 } else {
                     score += root_peep.score * candidate_peep.score;
+                }
+                if candidate_peep.stylistic && existing_credit_count == 0 {
+                    has_stylistic_peep_overlap = true;
                 }
                 let name = &root_peep.name;
                 let root_jobs = style(
